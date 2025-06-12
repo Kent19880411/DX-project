@@ -13,6 +13,8 @@
             --header-bg: #e9eff4;
             --completed-color: #999;
             --completed-bg: #f0f0f0;
+            --danger-color: #dc3545;
+            --danger-hover-color: #c82333;
         }
         body {
             font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', sans-serif;
@@ -85,37 +87,32 @@
             text-align: left;
             padding: 12px 8px;
             border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
         }
         th {
             background-color: #f9fafb;
         }
-        tr.completed {
-            background-color: var(--completed-bg);
+        tr.completed td:not(:last-child) {
+            text-decoration: line-through;
             color: var(--completed-color);
         }
-        tr.completed td {
-            text-decoration: line-through;
+        tr.completed {
+            background-color: var(--completed-bg);
         }
         input[type="checkbox"] {
             transform: scale(1.3);
             cursor: pointer;
         }
-        .task-name {
-            font-weight: 500;
-        }
-        .task-name.sub-task {
-            padding-left: 20px;
-        }
-        .task-name.sub-sub-task {
-            padding-left: 40px;
-        }
+        .task-name.sub-task { padding-left: 20px; }
+        .task-name.sub-sub-task { padding-left: 40px; }
         .editable {
             cursor: text;
-            min-width: 100px;
+            min-width: 80px;
         }
         .editable:focus {
             background-color: #fff3cd;
-            outline: 1px solid #ffeeba;
+            outline: 2px solid #ffeeba;
+            border-radius: 2px;
         }
         input[type="date"] {
             border: 1px solid transparent;
@@ -128,12 +125,34 @@
         input[type="date"]:focus {
             border: 1px solid var(--border-color);
         }
-        .button-container {
+        .action-cell { text-align: center; }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 0 5px;
+        }
+        .delete-btn:hover { color: var(--danger-color); }
+        .add-task-btn {
+            background-color: #f0f0f0;
+            border: 1px dashed #ccc;
+            color: #555;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .add-task-btn:hover { background-color: #e9e9e9; border-color: #bbb;}
+        .controls-container {
             text-align: right;
             margin-top: 20px;
         }
-        button {
-            background-color: #dc3545;
+        #reset-data-button {
+            background-color: var(--danger-color);
             color: white;
             border: none;
             padding: 8px 15px;
@@ -141,9 +160,7 @@
             cursor: pointer;
             font-size: 0.9em;
         }
-        button:hover {
-            background-color: #c82333;
-        }
+        #reset-data-button:hover { background-color: var(--danger-hover-color); }
     </style>
 </head>
 <body>
@@ -162,21 +179,21 @@
                 <h2>フェーズ1：事業基盤構築フェーズ（1〜3ヶ月）</h2>
                 <span class="phase-progress" id="phase-1-progress-text">0%</span>
             </summary>
-            <div class="phase-content">
-                <table id="phase-1-table">
+            <div class="phase-content" data-phase-id="1">
+                <table>
                     <thead>
                         <tr>
                             <th style="width:5%;">完了</th>
-                            <th style="width:50%;">タスク</th>
+                            <th style="width:45%;">タスク</th>
                             <th style="width:15%;">担当者</th>
                             <th style="width:15%;">期限</th>
-                            <th style="width:15%;">メモ</th>
+                            <th style="width:10%;">メモ</th>
+                            <th style="width:10%;">操作</th>
                         </tr>
                     </thead>
-                    <tbody>
-                        <!-- タスクはJSでここに挿入されます -->
-                    </tbody>
+                    <tbody></tbody>
                 </table>
+                <button class="add-task-btn">＋ タスクを追加</button>
             </div>
         </details>
 
@@ -186,20 +203,21 @@
                 <h2>フェーズ2：テストマーケティング・初期案件獲得フェーズ（4〜6ヶ月）</h2>
                 <span class="phase-progress" id="phase-2-progress-text">0%</span>
             </summary>
-            <div class="phase-content">
-                <table id="phase-2-table">
-                    <!-- ヘッダーとボディはフェーズ1と同様 -->
+            <div class="phase-content" data-phase-id="2">
+                 <table>
                     <thead>
                         <tr>
                             <th style="width:5%;">完了</th>
-                            <th style="width:50%;">タスク</th>
+                            <th style="width:45%;">タスク</th>
                             <th style="width:15%;">担当者</th>
                             <th style="width:15%;">期限</th>
-                            <th style="width:15%;">メモ</th>
+                            <th style="width:10%;">メモ</th>
+                            <th style="width:10%;">操作</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
+                <button class="add-task-btn">＋ タスクを追加</button>
             </div>
         </details>
         
@@ -209,33 +227,35 @@
                 <h2>フェーズ3：事業本格展開・拡大フェーズ（7ヶ月目以降）</h2>
                 <span class="phase-progress" id="phase-3-progress-text">0%</span>
             </summary>
-            <div class="phase-content">
-                 <table id="phase-3-table">
-                    <!-- ヘッダーとボディはフェーズ1と同様 -->
+            <div class="phase-content" data-phase-id="3">
+                 <table>
                     <thead>
                         <tr>
                             <th style="width:5%;">完了</th>
-                            <th style="width:50%;">タスク</th>
+                            <th style="width:45%;">タスク</th>
                             <th style="width:15%;">担当者</th>
                             <th style="width:15%;">期限</th>
-                            <th style="width:15%;">メモ</th>
+                            <th style="width:10%;">メモ</th>
+                            <th style="width:10%;">操作</th>
                         </tr>
                     </thead>
                     <tbody></tbody>
                 </table>
+                <button class="add-task-btn">＋ タスクを追加</button>
             </div>
         </details>
         
-        <div class="button-container">
+        <div class="controls-container">
             <button id="reset-data-button">進捗データをリセット</button>
         </div>
     </div>
 
     <script>
     document.addEventListener('DOMContentLoaded', function() {
-        const tasks = [
+        // 初期タスクデータ（変更不可）
+        const initialTasks = [
             // Phase 1
-            { id: '1', phase: 1, text: 'A. パートナーシップ確立', level: 0 },
+            { id: '1', phase: 1, text: 'A. パートナーシップ確立', level: 0, isHeader: true },
             { id: '1.1', phase: 1, text: '1. Google Workspace販売代理店契約の締結', level: 1 },
             { id: '1.1.1', phase: 1, text: '1-1. ディストリビューターの選定と連絡、条件交渉', level: 2 },
             { id: '1.1.2', phase: 1, text: '1-2. 申込書類の準備と提出', level: 2 },
@@ -244,7 +264,7 @@
             { id: '1.2.1', phase: 1, text: '2-1. 連携候補となるIT導入支援事業者のリストアップと調査', level: 2 },
             { id: '1.2.2', phase: 1, text: '2-2. 連携協議（コンソーシアム組成等）の実施と条件交渉', level: 2 },
             { id: '1.2.3', phase: 1, text: '2-3. 連携に関する覚書・契約の締結', level: 2 },
-            { id: '2', phase: 1, text: 'B. サービス・組織体制の構築', level: 0 },
+            { id: '2', phase: 1, text: 'B. サービス・組織体制の構築', level: 0, isHeader: true },
             { id: '2.1', phase: 1, text: '3. フリーランス専門家チームの組成（初期メンバー）', level: 1 },
             { id: '2.1.1', phase: 1, text: '3-1. 既存フリーランスネットワークへのスキル調査と協力依頼', level: 2 },
             { id: '2.1.2', phase: 1, text: '3-2. 新規事業に必要な採用要件の最終決定', level: 2 },
@@ -258,22 +278,21 @@
             { id: '2.3', phase: 1, text: '5. フリーランス品質管理プロセスの構築', level: 1 },
             { id: '2.3.1', phase: 1, text: '5-1. オンボーディングプログラムのコンテンツ作成', level: 2 },
             { id: '2.3.2', phase: 1, text: '5-2. 業務マニュアル、品質チェックリストの作成', level: 2 },
-            { id: '3', phase: 1, text: 'C. マーケティング準備', level: 0 },
+            { id: '3', phase: 1, text: 'C. マーケティング準備', level: 0, isHeader: true },
             { id: '3.1', phase: 1, text: '6. オンラインAI無料研修の企画・準備', level: 1 },
             { id: '3.1.1', phase: 1, text: '6-1. 研修テーマと詳細なアジェンダの決定', level: 2 },
             { id: '3.1.2', phase: 1, text: '6-2. 登壇者の決定とリハーサル', level: 2 },
             { id: '3.1.3', phase: 1, text: '6-3. 使用するウェビナーツールの選定と契約', level: 2 },
             { id: '3.1.4', phase: 1, text: '6-4. 集客用LPおよび申込フォームの作成', level: 2 },
-            
             // Phase 2
-            { id: '4', phase: 2, text: 'A. マーケティング施策の開始', level: 0 },
+            { id: '4', phase: 2, text: 'A. マーケティング施策の開始', level: 0, isHeader: true },
             { id: '4.1', phase: 2, text: '7. 既存顧客への先行案内', level: 1 },
             { id: '4.1.1', phase: 2, text: '7-1. 案内用メールマガジンの作成と配信', level: 2 },
             { id: '4.1.2', phase: 2, text: '7-2. RPO事業の営業担当者による個別案内の実施', level: 2 },
             { id: '4.2', phase: 2, text: '8. 第1回オンラインAI無料研修の実施', level: 1 },
             { id: '4.2.1', phase: 2, text: '8-1. 集客活動の実施（メール、SNS広告等）', level: 2 },
             { id: '4.2.2', phase: 2, text: '8-2. ウェビナーの実施とアンケート回収', level: 2 },
-            { id: '5', phase: 2, text: 'B. 初期案件の獲得とサービス提供', level: 0 },
+            { id: '5', phase: 2, text: 'B. 初期案件の獲得とサービス提供', level: 0, isHeader: true },
             { id: '5.1', phase: 2, text: '9. 個別相談会の実施', level: 1 },
             { id: '5.1.1', phase: 2, text: '9-1. 研修参加者へのフォローアップと個別相談への誘導', level: 2 },
             { id: '5.1.2', phase: 2, text: '9-2. 課題ヒアリングと、それに合わせたソリューション提案活動', level: 2 },
@@ -281,9 +300,8 @@
             { id: '5.2.1', phase: 2, text: '10-1. 契約手続きの実施', level: 2 },
             { id: '5.2.2', phase: 2, text: '10-2. 担当フリーランスのアサインとキックオフミーティングの開催', level: 2 },
             { id: '5.2.3', phase: 2, text: '10-3. サービス提供と品質管理プロセスの実践', level: 2 },
-
             // Phase 3
-            { id: '6', phase: 3, text: 'A. 事業運営の本格化', level: 0 },
+            { id: '6', phase: 3, text: 'A. 事業運営の本格化', level: 0, isHeader: true },
             { id: '6.1', phase: 3, text: '11. 定期的な事業レビューと改善', level: 1 },
             { id: '6.1.1', phase: 3, text: '11-1. KGI/KPIの進捗確認（月次レビュー会議の設定）', level: 2 },
             { id: '6.1.2', phase: 3, text: '11-2. 顧客満足度アンケートの分析とサービス改善への反映', level: 2 },
@@ -291,7 +309,7 @@
             { id: '6.2', phase: 3, text: '12. オンライン研修の定例化', level: 1 },
             { id: '6.2.1', phase: 3, text: '12-1. 研修テーマの拡充', level: 2 },
             { id: '6.2.2', phase: 3, text: '12-2. 定期開催スケジュールの策定と告知', level: 2 },
-            { id: '7', phase: 3, text: 'B. 事業拡大', level: 0 },
+            { id: '7', phase: 3, text: 'B. 事業拡大', level: 0, isHeader: true },
             { id: '7.1', phase: 3, text: '13. 新規顧客向けマーケティングの開始', level: 1 },
             { id: '7.1.1', phase: 3, text: '13-1. Web広告、コンテンツマーケティングの開始', level: 2 },
             { id: '7.1.2', phase: 3, text: '13-2. パートナー企業との連携模索とアライアンス構築', level: 2 },
@@ -302,8 +320,9 @@
             { id: '7.3.1', phase: 3, text: '15-1. 事業拡大に合わせた継続的なフリーランスの採用活動', level: 2 },
             { id: '7.3.2', phase: 3, text: '15-2. フリーランス向けの情報共有会や勉強会の企画・実施', level: 2 },
         ];
-
-        const STORAGE_KEY = 'projectTrackerData';
+        
+        const STORAGE_KEY = 'projectTrackerData_v2';
+        const container = document.querySelector('.container');
 
         function getPaddingClass(level) {
             if (level === 1) return 'sub-task';
@@ -311,68 +330,52 @@
             return '';
         }
 
-        function renderTasks() {
+        function createTaskRow(task, taskData = {}) {
+            const tr = document.createElement('tr');
+            tr.dataset.taskId = task.id;
+            tr.dataset.phase = task.phase;
+            if (task.isHeader) {
+                tr.innerHTML = `<td colspan="6" style="background-color: #f3f3f3; font-weight: bold;">${task.text}</td>`;
+                return tr;
+            }
+
+            const isCompleted = taskData.completed || false;
+            if (isCompleted) {
+                tr.classList.add('completed');
+            }
+
+            tr.innerHTML = `
+                <td><input type="checkbox" ${isCompleted ? 'checked' : ''}></td>
+                <td class="task-name editable ${getPaddingClass(task.level)}" contenteditable="true">${taskData.text || task.text}</td>
+                <td class="editable" contenteditable="true">${taskData.assignee || ''}</td>
+                <td><input type="date" value="${taskData.dueDate || ''}"></td>
+                <td class="editable" contenteditable="true">${taskData.notes || ''}</td>
+                <td class="action-cell"><button class="delete-btn" title="タスクを削除">×</button></td>
+            `;
+            return tr;
+        }
+
+        function renderAllTasks() {
             const data = loadData();
-            tasks.forEach(task => {
-                const tableBody = document.querySelector(`#phase-${task.phase}-table tbody`);
-                if (!tableBody) return;
-                
-                const taskData = data[task.id] || {};
-                const isHeader = task.level === 0;
-
-                const tr = document.createElement('tr');
-                tr.dataset.taskId = task.id;
-                tr.dataset.phase = task.phase;
-                if (taskData.completed) {
-                    tr.classList.add('completed');
+            // 既存の動的タスク（初期タスク以外）と初期タスクを結合
+            const allTasks = [...initialTasks];
+            for (const id in data) {
+                if (!initialTasks.some(t => t.id === id)) {
+                    allTasks.push({ id, ...data[id] });
                 }
+            }
 
-                if(isHeader) {
-                    tr.innerHTML = `<td colspan="5" style="background-color: #f3f3f3; font-weight: bold;">${task.text}</td>`;
-                } else {
-                    tr.innerHTML = `
-                        <td><input type="checkbox" ${taskData.completed ? 'checked' : ''}></td>
-                        <td class="task-name ${getPaddingClass(task.level)}">${task.text}</td>
-                        <td class="editable" contenteditable="true">${taskData.assignee || ''}</td>
-                        <td><input type="date" value="${taskData.dueDate || ''}"></td>
-                        <td class="editable" contenteditable="true">${taskData.notes || ''}</td>
-                    `;
+            allTasks.forEach(task => {
+                const tableBody = document.querySelector(`.phase-content[data-phase-id="${task.phase}"] tbody`);
+                if (tableBody) {
+                    const taskData = data[task.id] || {};
+                    const row = createTaskRow(task, taskData);
+                    tableBody.appendChild(row);
                 }
-                tableBody.appendChild(tr);
             });
-            addEventListeners();
             updateAllProgress();
         }
 
-        function addEventListeners() {
-            document.querySelectorAll('input[type="checkbox"]').forEach(checkbox => {
-                checkbox.addEventListener('change', (e) => {
-                    const tr = e.target.closest('tr');
-                    tr.classList.toggle('completed', e.target.checked);
-                    saveAndupdateProgress(tr.dataset.taskId);
-                });
-            });
-
-            document.querySelectorAll('.editable').forEach(cell => {
-                cell.addEventListener('blur', (e) => {
-                    saveAndupdateProgress(e.target.closest('tr').dataset.taskId);
-                });
-            });
-            
-            document.querySelectorAll('input[type="date"]').forEach(input => {
-                input.addEventListener('change', (e) => {
-                    saveAndupdateProgress(e.target.closest('tr').dataset.taskId);
-                });
-            });
-        }
-        
-        function saveAndupdateProgress(taskId) {
-            saveData();
-            const phase = document.querySelector(`tr[data-task-id="${taskId}"]`).dataset.phase;
-            updatePhaseProgress(phase);
-            updateOverallProgress();
-        }
-        
         function updateAllProgress() {
             for (let i = 1; i <= 3; i++) {
                 updatePhaseProgress(i);
@@ -381,40 +384,44 @@
         }
 
         function updatePhaseProgress(phaseNum) {
-            const phaseTasks = document.querySelectorAll(`#phase-${phaseNum}-table tbody tr`);
+            const phaseTasks = document.querySelectorAll(`.phase-content[data-phase-id="${phaseNum}"] tbody tr`);
             const relevantTasks = Array.from(phaseTasks).filter(tr => tr.querySelector('input[type="checkbox"]'));
-            if (relevantTasks.length === 0) return;
-
+            if (relevantTasks.length === 0) {
+                document.getElementById(`phase-${phaseNum}-progress-text`).textContent = `0%`;
+                return;
+            }
             const completedTasks = Array.from(relevantTasks).filter(tr => tr.querySelector('input[type="checkbox"]').checked);
             const progress = (completedTasks.length / relevantTasks.length) * 100;
-            
             document.getElementById(`phase-${phaseNum}-progress-text`).textContent = `${Math.round(progress)}%`;
         }
 
         function updateOverallProgress() {
             const allCheckboxes = document.querySelectorAll('tbody input[type="checkbox"]');
-            if (allCheckboxes.length === 0) return;
-            
+            if (allCheckboxes.length === 0) {
+                document.getElementById('overall-progress-bar').value = 0;
+                return;
+            }
             const completedCheckboxes = document.querySelectorAll('tbody input[type="checkbox"]:checked');
             const progress = (completedCheckboxes.length / allCheckboxes.length) * 100;
-            
-            const progressBar = document.getElementById('overall-progress-bar');
-            progressBar.value = progress;
+            document.getElementById('overall-progress-bar').value = progress;
         }
 
         function saveData() {
             const dataToSave = {};
             document.querySelectorAll('tbody tr[data-task-id]').forEach(tr => {
                 const id = tr.dataset.taskId;
-                const checkbox = tr.querySelector('input[type="checkbox"]');
-                if(!checkbox) return; // Skip header rows
+                if(tr.querySelector('td[colspan="6"]')) return; // Skip header rows
 
+                const checkbox = tr.querySelector('input[type="checkbox"]');
                 const cells = tr.querySelectorAll('td');
                 dataToSave[id] = {
+                    phase: tr.dataset.phase,
+                    text: cells[1].textContent.trim(),
                     completed: checkbox.checked,
-                    assignee: cells[2].textContent,
+                    assignee: cells[2].textContent.trim(),
                     dueDate: tr.querySelector('input[type="date"]').value,
-                    notes: cells[4].textContent
+                    notes: cells[4].textContent.trim(),
+                    level: 2 // 新規タスクはインデントレベル2とする
                 };
             });
             localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
@@ -424,7 +431,61 @@
             const savedData = localStorage.getItem(STORAGE_KEY);
             return savedData ? JSON.parse(savedData) : {};
         }
+        
+        // --- Event Listeners using Delegation ---
+        
+        // For 'change' events (checkbox, date)
+        container.addEventListener('change', (e) => {
+            if (e.target.matches('input[type="checkbox"]')) {
+                const tr = e.target.closest('tr');
+                tr.classList.toggle('completed', e.target.checked);
+                saveData();
+                updateAllProgress();
+            } else if (e.target.matches('input[type="date"]')) {
+                saveData();
+            }
+        });
 
+        // For 'blur' on contenteditable cells
+        container.addEventListener('blur', (e) => {
+            if (e.target.matches('.editable')) {
+                saveData();
+            }
+        }, true); // Use capture phase for blur event
+
+        // For 'click' events (add, delete)
+        container.addEventListener('click', (e) => {
+            // Delete Task
+            if (e.target.matches('.delete-btn')) {
+                const tr = e.target.closest('tr');
+                const taskText = tr.querySelector('.task-name').textContent;
+                if (confirm(`タスク「${taskText.trim()}」を本当に削除しますか？`)) {
+                    tr.remove();
+                    saveData();
+                    updateAllProgress();
+                }
+            }
+            // Add Task
+            if (e.target.matches('.add-task-btn')) {
+                const phaseContent = e.target.closest('.phase-content');
+                const tableBody = phaseContent.querySelector('tbody');
+                const phaseId = phaseContent.dataset.phaseId;
+                
+                const newTask = {
+                    id: 'task_' + Date.now(),
+                    phase: phaseId,
+                    text: '新しいタスク',
+                    level: 2, // Default to sub-sub-task level
+                };
+
+                const newRow = createTaskRow(newTask);
+                tableBody.appendChild(newRow);
+                saveData();
+                updateAllProgress();
+            }
+        });
+
+        // Reset Button
         document.getElementById('reset-data-button').addEventListener('click', function() {
             if (confirm('本当にすべての進捗データをリセットしますか？この操作は元に戻せません。')) {
                 localStorage.removeItem(STORAGE_KEY);
@@ -432,8 +493,8 @@
             }
         });
 
-        // 初期化
-        renderTasks();
+        // Initial render
+        renderAllTasks();
     });
     </script>
 </body>
