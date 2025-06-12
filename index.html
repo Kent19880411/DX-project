@@ -5,46 +5,217 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>事業計画 プロジェクト管理ツール (Google Sheets版)</title>
     <style>
-        /* (前回のCSSと同じなので省略しています。長いのでコード全体に含めています) */
-        :root{--primary-color:#4a90e2;--background-color:#f4f7f9;--text-color:#333;--border-color:#ddd;--header-bg:#e9eff4;--completed-color:#999;--completed-bg:#f0f0f0;--danger-color:#dc3545;--danger-hover-color:#c82333;--loading-bg:rgba(255, 255, 255, 0.8);}
-        body{font-family:'Segoe UI','Meiryo','Hiragino Kaku Gothic ProN',sans-serif;line-height:1.6;background-color:var(--background-color);color:var(--text-color);margin:0;padding:20px;}
-        .container{max-width:1200px;margin:0 auto;background-color:#fff;padding:25px;border-radius:8px;box-shadow:0 4px 12px rgba(0,0,0,0.1);position:relative;}
-        h1{color:var(--primary-color);border-bottom:2px solid var(--primary-color);padding-bottom:10px;margin-top:0;}
-        .overall-progress{margin-bottom:25px;}
-        .overall-progress label{font-weight:bold;display:block;margin-bottom:5px;}
-        progress{width:100%;height:25px;accent-color:var(--primary-color);}
-        .phase{margin-bottom:20px;border:1px solid var(--border-color);border-radius:5px;overflow:hidden;}
-        .phase-header{background-color:var(--header-bg);padding:10px 15px;cursor:pointer;user-select:none;}
-        .phase-header h2{margin:0;font-size:1.2em;display:inline-block;}
-        .phase-header:hover{background-color:#dbe4ec;}
-        .phase-progress{float:right;font-size:0.9em;font-weight:bold;}
-        .phase-content{padding:15px;}
-        table{width:100%;border-collapse:collapse;}
-        th,td{text-align:left;padding:12px 8px;border-bottom:1px solid var(--border-color);vertical-align:middle;}
-        th{background-color:#f9fafb;}
-        tr.completed td:not(:last-child){text-decoration:line-through;color:var(--completed-color);}
-        tr.completed{background-color:var(--completed-bg);}
-        input[type="checkbox"]{transform:scale(1.3);cursor:pointer;}
-        .task-name.sub-task{padding-left:20px;}
-        .task-name.sub-sub-task{padding-left:40px;}
-        .editable{cursor:text;min-width:80px;}
-        .editable:focus{background-color:#fff3cd;outline:2px solid #ffeeba;border-radius:2px;}
-        input[type="date"]{border:1px solid transparent;background-color:transparent;padding:2px;font-family:inherit;font-size:inherit;width:130px;}
-        input[type="date"]:focus{border:1px solid var(--border-color);}
-        .action-cell{text-align:center;}
-        .delete-btn{background:none;border:none;color:#aaa;cursor:pointer;font-size:1.2em;padding:0 5px;}
-        .delete-btn:hover{color:var(--danger-color);}
-        .add-task-btn{background-color:#f0f0f0;border:1px dashed #ccc;color:#555;padding:10px;width:100%;cursor:pointer;border-radius:4px;margin-top:10px;font-weight:bold;}
-        .add-task-btn:hover{background-color:#e9e9e9;border-color:#bbb;}
-        .controls-container{display:flex;justify-content:space-between;align-items:center;margin-top:20px;}
-        #reset-data-button{background-color:var(--danger-color);color:white;border:none;padding:8px 15px;border-radius:4px;cursor:pointer;font-size:0.9em;}
-        #reset-data-button:hover{background-color:var(--danger-hover-color);}
-        .status-indicator{font-size:0.9em;color:#666;}
-        .loader{position:absolute;top:0;left:0;width:100%;height:100%;background:var(--loading-bg);z-index:100;display:flex;justify-content:center;align-items:center;flex-direction:column;border-radius:8px;}
-        .spinner{border:6px solid #f3f3f3;border-top:6px solid var(--primary-color);border-radius:50%;width:50px;height:50px;animation:spin 1s linear infinite;}
-        .loader-text{margin-top:15px;font-weight:bold;color:var(--text-color);}
-        .hidden{display:none;}
-        @keyframes spin{0%{transform:rotate(0deg);}100%{transform:rotate(360deg);}}
+        :root {
+            --primary-color: #4a90e2;
+            --background-color: #f4f7f9;
+            --text-color: #333;
+            --border-color: #ddd;
+            --header-bg: #e9eff4;
+            --completed-color: #999;
+            --completed-bg: #f0f0f0;
+            --danger-color: #dc3545;
+            --danger-hover-color: #c82333;
+            --loading-bg: rgba(255, 255, 255, 0.8);
+        }
+        body {
+            font-family: 'Segoe UI', 'Meiryo', 'Hiragino Kaku Gothic ProN', sans-serif;
+            line-height: 1.6;
+            background-color: var(--background-color);
+            color: var(--text-color);
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background-color: #fff;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+        }
+        h1 {
+            color: var(--primary-color);
+            border-bottom: 2px solid var(--primary-color);
+            padding-bottom: 10px;
+            margin-top: 0;
+        }
+        .overall-progress {
+            margin-bottom: 25px;
+        }
+        .overall-progress label {
+            font-weight: bold;
+            display: block;
+            margin-bottom: 5px;
+        }
+        progress {
+            width: 100%;
+            height: 25px;
+            accent-color: var(--primary-color);
+        }
+        .phase {
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+            border-radius: 5px;
+            overflow: hidden;
+        }
+        .phase-header {
+            background-color: var(--header-bg);
+            padding: 10px 15px;
+            cursor: pointer;
+            user-select: none;
+        }
+        .phase-header h2 {
+            margin: 0;
+            font-size: 1.2em;
+            display: inline-block;
+        }
+        .phase-header:hover {
+            background-color: #dbe4ec;
+        }
+        .phase-progress {
+            float: right;
+            font-size: 0.9em;
+            font-weight: bold;
+        }
+        .phase-content {
+            padding: 15px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th, td {
+            text-align: left;
+            padding: 12px 8px;
+            border-bottom: 1px solid var(--border-color);
+            vertical-align: middle;
+        }
+        th {
+            background-color: #f9fafb;
+        }
+        tr.completed td:not(:last-child) {
+            text-decoration: line-through;
+            color: var(--completed-color);
+        }
+        tr.completed {
+            background-color: var(--completed-bg);
+        }
+        input[type="checkbox"] {
+            transform: scale(1.3);
+            cursor: pointer;
+        }
+        .task-name.sub-task {
+            padding-left: 20px;
+        }
+        .task-name.sub-sub-task {
+            padding-left: 40px;
+        }
+        .editable {
+            cursor: text;
+            min-width: 80px;
+        }
+        .editable:focus {
+            background-color: #fff3cd;
+            outline: 2px solid #ffeeba;
+            border-radius: 2px;
+        }
+        input[type="date"] {
+            border: 1px solid transparent;
+            background-color: transparent;
+            padding: 2px;
+            font-family: inherit;
+            font-size: inherit;
+            width: 130px;
+        }
+        input[type="date"]:focus {
+            border: 1px solid var(--border-color);
+        }
+        .action-cell {
+            text-align: center;
+        }
+        .delete-btn {
+            background: none;
+            border: none;
+            color: #aaa;
+            cursor: pointer;
+            font-size: 1.2em;
+            padding: 0 5px;
+        }
+        .delete-btn:hover {
+            color: var(--danger-color);
+        }
+        .add-task-btn {
+            background-color: #f0f0f0;
+            border: 1px dashed #ccc;
+            color: #555;
+            padding: 10px;
+            width: 100%;
+            cursor: pointer;
+            border-radius: 4px;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+        .add-task-btn:hover {
+            background-color: #e9e9e9;
+            border-color: #bbb;
+        }
+        .controls-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 20px;
+        }
+        #reset-data-button {
+            background-color: var(--danger-color);
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 0.9em;
+        }
+        #reset-data-button:hover {
+            background-color: var(--danger-hover-color);
+        }
+        .status-indicator {
+            font-size: 0.9em;
+            color: #666;
+        }
+        .loader {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: var(--loading-bg);
+            z-index: 100;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            border-radius: 8px;
+        }
+        .spinner {
+            border: 6px solid #f3f3f3;
+            border-top: 6px solid var(--primary-color);
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+        }
+        .loader-text {
+            margin-top: 15px;
+            font-weight: bold;
+            color: var(--text-color);
+        }
+        .hidden {
+            display: none;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
     </style>
 </head>
 <body>
@@ -61,10 +232,77 @@
             <progress id="overall-progress-bar" value="0" max="100"></progress>
         </div>
 
-        <!-- フェーズのHTML構造（変更なし） -->
-        <details class="phase" open><summary class="phase-header"><h2>フェーズ1：事業基盤構築フェーズ（1〜3ヶ月）</h2><span class="phase-progress" id="phase-1-progress-text">0%</span></summary><div class="phase-content" data-phase-id="1"><table><thead><tr><th style="width:5%;">完了</th><th style="width:45%;">タスク</th><th style="width:15%;">担当者</th><th style="width:15%;">期限</th><th style="width:10%;">メモ</th><th style="width:10%;">操作</th></tr></thead><tbody></tbody></table><button class="add-task-btn">＋ タスクを追加</button></div></details>
-        <details class="phase" open><summary class="phase-header"><h2>フェーズ2：テストマーケティング・初期案件獲得フェーズ（4〜6ヶ月）</h2><span class="phase-progress" id="phase-2-progress-text">0%</span></summary><div class="phase-content" data-phase-id="2"><table><thead><tr><th style="width:5%;">完了</th><th style="width:45%;">タスク</th><th style="width:15%;">担当者</th><th style="width:15%;">期限</th><th style="width:10%;">メモ</th><th style="width:10%;">操作</th></tr></thead><tbody></tbody></table><button class="add-task-btn">＋ タスクを追加</button></div></details>
-        <details class="phase" open><summary class="phase-header"><h2>フェーズ3：事業本格展開・拡大フェーズ（7ヶ月目以降）</h2><span class="phase-progress" id="phase-3-progress-text">0%</span></summary><div class="phase-content" data-phase-id="3"><table><thead><tr><th style="width:5%;">完了</th><th style="width:45%;">タスク</th><th style="width:15%;">担当者</th><th style="width:15%;">期限</th><th style="width:10%;">メモ</th><th style="width:10%;">操作</th></tr></thead><tbody></tbody></table><button class="add-task-btn">＋ タスクを追加</button></div></details>
+        <!-- フェーズ1 -->
+        <details class="phase" open>
+            <summary class="phase-header">
+                <h2>フェーズ1：事業基盤構築フェーズ（1〜3ヶ月）</h2>
+                <span class="phase-progress" id="phase-1-progress-text">0%</span>
+            </summary>
+            <div class="phase-content" data-phase-id="1">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:5%;">完了</th>
+                            <th style="width:45%;">タスク</th>
+                            <th style="width:15%;">担当者</th>
+                            <th style="width:15%;">期限</th>
+                            <th style="width:10%;">メモ</th>
+                            <th style="width:10%;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <button class="add-task-btn">＋ タスクを追加</button>
+            </div>
+        </details>
+
+        <!-- フェーズ2 -->
+        <details class="phase" open>
+            <summary class="phase-header">
+                <h2>フェーズ2：テストマーケティング・初期案件獲得フェーズ（4〜6ヶ月）</h2>
+                <span class="phase-progress" id="phase-2-progress-text">0%</span>
+            </summary>
+            <div class="phase-content" data-phase-id="2">
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width:5%;">完了</th>
+                            <th style="width:45%;">タスク</th>
+                            <th style="width:15%;">担当者</th>
+                            <th style="width:15%;">期限</th>
+                            <th style="width:10%;">メモ</th>
+                            <th style="width:10%;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <button class="add-task-btn">＋ タスクを追加</button>
+            </div>
+        </details>
+        
+        <!-- フェーズ3 -->
+        <details class="phase" open>
+            <summary class="phase-header">
+                <h2>フェーズ3：事業本格展開・拡大フェーズ（7ヶ月目以降）</h2>
+                <span class="phase-progress" id="phase-3-progress-text">0%</span>
+            </summary>
+            <div class="phase-content" data-phase-id="3">
+                 <table>
+                    <thead>
+                        <tr>
+                            <th style="width:5%;">完了</th>
+                            <th style="width:45%;">タスク</th>
+                            <th style="width:15%;">担当者</th>
+                            <th style="width:15%;">期限</th>
+                            <th style="width:10%;">メモ</th>
+                            <th style="width:10%;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+                <button class="add-task-btn">＋ タスクを追加</button>
+            </div>
+        </details>
 
         <div class="controls-container">
             <span id="status-indicator" class="status-indicator"></span>
@@ -75,15 +313,78 @@
 <script>
 document.addEventListener('DOMContentLoaded', function() {
     // ▼▼▼ 【重要】ここにあなたのウェブアプリURLを貼り付けてください ▼▼▼
-    const GAS_URL = 'https://script.google.com/a/macros/vantage-point.co.jp/s/AKfycbyFu3ZG0XjRGpaHhwyWbjJXlYVUhtfBAKmw2x7ldi8QNvsPD0_D_zyWuK801n7d1N-O/exec';
+    const GAS_URL = 'ここにあなたのウェブアプリURLを貼り付け';
     // ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲ ▲▲▲
 
     // 初期タスクデータ（スプレッドシートにない場合のみ使用される）
     const initialTasks = [
+        // Phase 1
         { id: 'h-1', phase: 1, text: 'A. パートナーシップ確立', isHeader: true },
         { id: 't-1.1', phase: 1, text: '1. Google Workspace販売代理店契約の締結', level: 1 },
         { id: 't-1.1.1', phase: 1, text: '1-1. ディストリビューターの選定と連絡、条件交渉', level: 2 },
-        // ... (以下、前回と同じ初期タスクデータを想定。長すぎるので省略)
+        { id: 't-1.1.2', phase: 1, text: '1-2. 申込書類の準備と提出', level: 2 },
+        { id: 't-1.1.3', phase: 1, text: '1-3. 契約内容の精査と締結', level: 2 },
+        { id: 't-1.2', phase: 1, text: '2. IT導入支援事業者との連携', level: 1 },
+        { id: 't-1.2.1', phase: 1, text: '2-1. 連携候補となるIT導入支援事業者のリストアップと調査', level: 2 },
+        { id: 't-1.2.2', phase: 1, text: '2-2. 連携協議（コンソーシアム組成等）の実施と条件交渉', level: 2 },
+        { id: 't-1.2.3', phase: 1, text: '2-3. 連携に関する覚書・契約の締結', level: 2 },
+        { id: 'h-2', phase: 1, text: 'B. サービス・組織体制の構築', isHeader: true },
+        { id: 't-2.1', phase: 1, text: '3. フリーランス専門家チームの組成（初期メンバー）', level: 1 },
+        { id: 't-2.1.1', phase: 1, text: '3-1. 既存フリーランスネットワークへのスキル調査と協力依頼', level: 2 },
+        { id: 't-2.1.2', phase: 1, text: '3-2. 新規事業に必要な採用要件の最終決定', level: 2 },
+        { id: 't-2.1.3', phase: 1, text: '3-3. 不足スキルを補うための外部募集チャネルの選定', level: 2 },
+        { id: 't-2.1.4', phase: 1, text: '3-4. 面接・評価プロセスの確立と実施', level: 2 },
+        { id: 't-2.1.5', phase: 1, text: '3-5. 初期メンバーとの業務委託契約締結', level: 2 },
+        { id: 't-2.2', phase: 1, text: '4. サービスメニューと価格体系の最終決定', level: 1 },
+        { id: 't-2.2.1', phase: 1, text: '4-1. 工数ベースの価格設定モデルの確定', level: 2 },
+        { id: 't-2.2.2', phase: 1, text: '4-2. 各種プランの詳細なサービス内容の定義', level: 2 },
+        { id: 't-2.2.3', phase: 1, text: '4-3. 提案書、見積書、契約書等の各種テンプレート作成', level: 2 },
+        { id: 't-2.3', phase: 1, text: '5. フリーランス品質管理プロセスの構築', level: 1 },
+        { id: 't-2.3.1', phase: 1, text: '5-1. オンボーディングプログラムのコンテンツ作成', level: 2 },
+        { id: 't-2.3.2', phase: 1, text: '5-2. 業務マニュアル、品質チェックリストの作成', level: 2 },
+        { id: 'h-3', phase: 1, text: 'C. マーケティング準備', isHeader: true },
+        { id: 't-3.1', phase: 1, text: '6. オンラインAI無料研修の企画・準備', level: 1 },
+        { id: 't-3.1.1', phase: 1, text: '6-1. 研修テーマと詳細なアジェンダの決定', level: 2 },
+        { id: 't-3.1.2', phase: 1, text: '6-2. 登壇者の決定とリハーサル', level: 2 },
+        { id: 't-3.1.3', phase: 1, text: '6-3. 使用するウェビナーツールの選定と契約', level: 2 },
+        { id: 't-3.1.4', phase: 1, text: '6-4. 集客用LPおよび申込フォームの作成', level: 2 },
+        
+        // Phase 2
+        { id: 'h-4', phase: 2, text: 'A. マーケティング施策の開始', isHeader: true },
+        { id: 't-4.1', phase: 2, text: '7. 既存顧客への先行案内', level: 1 },
+        { id: 't-4.1.1', phase: 2, text: '7-1. 案内用メールマガジンの作成と配信', level: 2 },
+        { id: 't-4.1.2', phase: 2, text: '7-2. RPO事業の営業担当者による個別案内の実施', level: 2 },
+        { id: 't-4.2', phase: 2, text: '8. 第1回オンラインAI無料研修の実施', level: 1 },
+        { id: 't-4.2.1', phase: 2, text: '8-1. 集客活動の実施（メール、SNS広告等）', level: 2 },
+        { id: 't-4.2.2', phase: 2, text: '8-2. ウェビナーの実施とアンケート回収', level: 2 },
+        { id: 'h-5', phase: 2, text: 'B. 初期案件の獲得とサービス提供', isHeader: true },
+        { id: 't-5.1', phase: 2, text: '9. 個別相談会の実施', level: 1 },
+        { id: 't-5.1.1', phase: 2, text: '9-1. 研修参加者へのフォローアップと個別相談への誘導', level: 2 },
+        { id: 't-5.1.2', phase: 2, text: '9-2. 課題ヒアリングと、それに合わせたソリューション提案活動', level: 2 },
+        { id: 't-5.2', phase: 2, text: '10. 初期案件の契約とプロジェクト開始', level: 1 },
+        { id: 't-5.2.1', phase: 2, text: '10-1. 契約手続きの実施', level: 2 },
+        { id: 't-5.2.2', phase: 2, text: '10-2. 担当フリーランスのアサインとキックオフミーティングの開催', level: 2 },
+        { id: 't-5.2.3', phase: 2, text: '10-3. サービス提供と品質管理プロセスの実践', level: 2 },
+
+        // Phase 3
+        { id: 'h-6', phase: 3, text: 'A. 事業運営の本格化', isHeader: true },
+        { id: 't-6.1', phase: 3, text: '11. 定期的な事業レビューと改善', level: 1 },
+        { id: 't-6.1.1', phase: 3, text: '11-1. KGI/KPIの進捗確認（月次レビュー会議の設定）', level: 2 },
+        { id: 't-6.1.2', phase: 3, text: '11-2. 顧客満足度アンケートの分析とサービス改善への反映', level: 2 },
+        { id: 't-6.1.3', phase: 3, text: '11-3. フリーランスからのフィードバック収集と業務プロセスの改善', level: 2 },
+        { id: 't-6.2', phase: 3, text: '12. オンライン研修の定例化', level: 1 },
+        { id: 't-6.2.1', phase: 3, text: '12-1. 研修テーマの拡充', level: 2 },
+        { id: 't-6.2.2', phase: 3, text: '12-2. 定期開催スケジュールの策定と告知', level: 2 },
+        { id: 'h-7', phase: 3, text: 'B. 事業拡大', isHeader: true },
+        { id: 't-7.1', phase: 3, text: '13. 新規顧客向けマーケティングの開始', level: 1 },
+        { id: 't-7.1.1', phase: 3, text: '13-1. Web広告、コンテンツマーケティングの開始', level: 2 },
+        { id: 't-7.1.2', phase: 3, text: '13-2. パートナー企業との連携模索とアライアンス構築', level: 2 },
+        { id: 't-7.2', phase: 3, text: '14. 導入事例の創出と横展開', level: 1 },
+        { id: 't-7.2.1', phase: 3, text: '14-1. 初期顧客の成功事例をヒアリングし、コンテンツ化', level: 2 },
+        { id: 't-7.2.2', phase: 3, text: '14-2. 事例を活用した営業資料のアップデートとWebサイトでの公開', level: 2 },
+        { id: 't-7.3', phase: 3, text: '15. フリーランス採用の継続とコミュニティ化', level: 1 },
+        { id: 't-7.3.1', phase: 3, text: '15-1. 事業拡大に合わせた継続的なフリーランスの採用活動', level: 2 },
+        { id: 't-7.3.2', phase: 3, text: '15-2. フリーランス向けの情報共有会や勉強会の企画・実施', level: 2 },
     ];
     
     const container = document.querySelector('.container');
@@ -108,6 +409,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // GASにリクエストを送信する共通関数
     async function fetchGAS(method, body = null) {
+        if (GAS_URL === 'ここにあなたのウェブアプリURLを貼り付け') {
+            alert('HTMLファイル内のGAS_URLを、あなたのウェブアプリURLに書き換えてください。');
+            throw new Error('GAS_URL is not set.');
+        }
         try {
             const options = {
                 method: method,
@@ -137,7 +442,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (result.status === 'success') {
                 allTasksData = result.data;
                 // スプレッドシートが空の場合、初期タスクを登録
-                if (allTasksData.length === 0 && initialTasks.length > 0) {
+                if (allTasksData.length === 0 && initialTasks.filter(t => !t.isHeader).length > 0) {
                     await initializeSheetWithTasks();
                 } else {
                     renderAllTasks();
@@ -157,22 +462,23 @@ document.addEventListener('DOMContentLoaded', function() {
     async function initializeSheetWithTasks() {
         showLoader('初期設定中...');
         try {
-            for (const task of initialTasks) {
+            // isHeaderでないタスクのみを登録対象とする
+            const tasksToRegister = initialTasks.filter(task => !task.isHeader);
+            for (const task of tasksToRegister) {
                 const payload = {
                     id: task.id,
                     phase: task.phase,
-                    level: task.isHeader ? 0 : task.level,
+                    level: task.level,
                     text: task.text,
                     completed: false,
                     assignee: '',
                     dueDate: '',
                     notes: ''
                 };
-                // isHeaderはスプレッドシートに保存しない
-                if (task.isHeader) continue;
                 await fetchGAS('POST', { action: 'save', payload });
             }
-            await loadTasksFromSheet(); // 再読み込み
+            // 登録後に再度データを読み込む
+            await loadTasksFromSheet();
             updateStatus('初期設定が完了しました。');
         } catch (error) {
             updateStatus('初期設定に失敗しました。', true);
@@ -214,8 +520,10 @@ document.addEventListener('DOMContentLoaded', function() {
     function renderAllTasks() {
         document.querySelectorAll('tbody').forEach(tbody => tbody.innerHTML = '');
         
-        const displayTasks = [...initialTasks.filter(t => t.isHeader), ...allTasksData];
-        displayTasks.sort((a,b) => String(a.id).localeCompare(String(b.id), undefined, {numeric: true}));
+        const headers = initialTasks.filter(t => t.isHeader);
+        const displayTasks = [...headers, ...allTasksData];
+        // idでソートして表示順を安定させる (例: 'h-1', 't-1.1', 't-1.1.1')
+        displayTasks.sort((a, b) => String(a.id).localeCompare(String(b.id), undefined, { numeric: true, sensitivity: 'base' }));
 
         displayTasks.forEach(task => {
             const tableBody = document.querySelector(`.phase-content[data-phase-id="${task.phase}"] tbody`);
@@ -252,8 +560,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if(result.status === 'success') {
                 // allTasksDataを更新
                 const index = allTasksData.findIndex(t => t.id === payload.id);
-                if (index > -1) allTasksData[index] = payload;
-                else allTasksData.push(payload);
+                if (index > -1) {
+                    allTasksData[index] = payload;
+                } else {
+                    allTasksData.push(payload);
+                }
                 updateStatus('保存しました。');
             } else {
                 throw new Error(result.message);
@@ -275,6 +586,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // blurイベントは伝播しないため、キャプチャフェーズで捉える
     container.addEventListener('blur', (e) => {
         if (e.target.matches('.editable')) {
             saveTask(e.target.closest('tr'));
@@ -345,6 +657,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
+    // 進捗計算関数群
     function updateAllProgress() {
         for (let i = 1; i <= 3; i++) { updatePhaseProgress(i); }
         updateOverallProgress();
@@ -373,6 +686,5 @@ document.addEventListener('DOMContentLoaded', function() {
     loadTasksFromSheet();
 });
 </script>
-
 </body>
 </html>
